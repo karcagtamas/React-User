@@ -1,15 +1,19 @@
-import React, { ReactElement } from "react";
+import React, { Component, ReactElement } from "react";
 import styles from "./Card.module.css";
 
-interface Props {
+type Props = {
   children: ReactElement | ReactElement[];
   className?: string;
-}
-
-const Card: React.FC<Props> = (props: Props) => {
-  return (
-    <div className={`${styles.card} ${props.className}`}>{props.children}</div>
-  );
 };
+
+class Card extends Component<Props, {}> {
+  render(): React.ReactNode {
+    return (
+      <div className={`${styles.card} ${this.props.className}`}>
+        {this.props.children}
+      </div>
+    );
+  }
+}
 
 export default Card;

@@ -1,82 +1,109 @@
-import React, { ChangeEvent, FormEvent, useState } from "react";
+import React, { ChangeEvent, Component, FormEvent, useState } from "react";
 import { User } from "../../User.model";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
 import ErrorModal from "../ui/ErrorModal";
 import styles from "./AddUser.module.css";
 
-interface Props {
+type Props = {
   onAddUser: (user: User) => void;
-}
+};
+
+type State = {
+  error: Error | null;
+  username: string;
+  age: number;
+};
 
 interface Error {
   title: string;
   message: string;
 }
 
-const AddUser: React.FC<Props> = (props: Props) => {
-  const [error, setError] = useState(null as Error | null);
+class AddUser extends Component<Props, State> {
+  state: Readonly<State> = {
+    error: null,
+    username: "",
+    age: 21,
+  };
 
-  const [username, setUsername] = useState("");
-  const [age, setAge] = useState(0);
+  render(): React.ReactNode {
+    return (
+      <React.Fragment>
+        {this.state.error != null && (
+          <ErrorModal
+            title={this.state.error.title}
+            message={this.state.error.message}
+            onConfirm={this.errorHandler}
+          />
+        )}
+        <Card className={styles.input}>
+          <form onSubmit={this.addUserHandler}>
+            <label htmlFor="username">Username</label>
+            <input
+              id="username"
+              value={this.state.username}
+              type="text"
+              onChange={this.usernameChangeHandler}
+            />
+            <label htmlFor="age">Age (Years)</label>
+            <input
+              id="age"
+              value={this.state.age}
+              type="number"
+              onChange={this.ageChangeHandler}
+            />
+            <Button type="submit">Add User</Button>
+          </form>
+        </Card>
+      </React.Fragment>
+    );
+  }
 
-  const addUserHandler = (event: FormEvent<HTMLFormElement>) => {
+  addUserHandler = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (username.trim().length === 0 || age <= 0) {
-      setError({
-        title: "Invalid input",
-        message: "Stupid. Enter valid entries.",
+    if (this.state.username.trim().length === 0 || this.state.age <= 0) {
+      this.setState((prev) => {
+        return {
+          ...prev,
+          error: {
+            title: "Invalid input",
+            message: "Stupid. Enter valid entries.",
+          },
+        };
       });
+
       return;
     }
 
-    console.log(username, age);
-    props.onAddUser({ name: username, age, id: Math.random().toString() });
-    setUsername("");
-    setAge(0);
+    console.log(this.state.username, this.state.age);
+    this.props.onAddUser({
+      name: this.state.username,
+      age: this.state.age,
+      id: Math.random().toString(),
+    });
+
+    this.setState((prev) => {
+      return { ...prev, username: "", age: 21 };
+    });
   };
 
-  const errorHandler = () => {
-    setError(null);
+  errorHandler = () => {
+    this.setState((prev) => {
+      return { ...prev, error: null };
+    });
   };
 
-  const usernameChangeHandler = (event: ChangeEvent<HTMLInputElement>) =>
-    setUsername(event.target.value);
+  usernameChangeHandler = (event: ChangeEvent<HTMLInputElement>) =>
+    this.setState((prev) => {
+      return { ...prev, username: event.target.value };
+    });
 
-  const ageChangeHandler = (event: ChangeEvent<HTMLInputElement>) =>
-    setAge(Number(event.target.value));
-
-  return (
-    <React.Fragment>
-      {error != null && (
-        <ErrorModal
-          title={error.title}
-          message={error.message}
-          onConfirm={errorHandler}
-        />
-      )}
-      <Card className={styles.input}>
-        <form onSubmit={addUserHandler}>
-          <label htmlFor="username">Username</label>
-          <input
-            id="username"
-            value={username}
-            type="text"
-            onChange={usernameChangeHandler}
-          />
-          <label htmlFor="age">Age (Years)</label>
-          <input
-            id="age"
-            value={age}
-            type="number"
-            onChange={ageChangeHandler}
-          />
-          <Button type="submit">Add User</Button>
-        </form>
-      </Card>
-    </React.Fragment>
-  );
-};
+  ageChangeHandler = (event: ChangeEvent<HTMLInputElement>) =>
+    this.setState((prev) => {
+      return { ...prev, age: +event.target.value };
+    });
+}
 
 export default AddUser;

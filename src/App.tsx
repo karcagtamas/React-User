@@ -1,24 +1,32 @@
-import { useState } from "react";
+import { Component, ReactNode } from "react";
 import "./App.css";
 import AddUser from "./components/users/AddUser";
 import UserList from "./components/users/UserList";
 import { User } from "./User.model";
 
-function App() {
-  const [users, setUsers] = useState([] as User[]);
+type State = {
+  users: User[];
+};
 
-  const addUserHandler = (user: User) => {
-    setUsers((prev) => {
-      return [...prev, user];
+class App extends Component<{}, State> {
+  state: Readonly<State> = { users: [] };
+
+  render(): ReactNode {
+    return (
+      <div>
+        <AddUser onAddUser={this.addUserHandler} />
+        <UserList users={this.state.users} />
+      </div>
+    );
+  }
+
+  addUserHandler(user: User) {
+    this.setState((state) => {
+      return {
+        users: [...state.users, user],
+      };
     });
-  };
-
-  return (
-    <div>
-      <AddUser onAddUser={addUserHandler} />
-      <UserList users={users} />
-    </div>
-  );
+  }
 }
 
 export default App;
